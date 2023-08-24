@@ -520,73 +520,64 @@ defmodule Elixlsx.XMLTemplates do
   defp make_xl_drawings_twoCell(image, wci, s) do
     drawing_id = to_string(DrawingDB.get_id(wci.drawingdb, image))
 
-    {from_col, to_col, {from_col_off, to_col_off}} =
-      case image.align_x do
-        :left ->
-          U.px_to_col_span_from_left(s, image.x, image.width + image.x_offset)
+    # cols + offsets
+    # This takes into account align_x which
+    # could be :left or :right
+    {from_col, to_col, {from_col_off, to_col_off}} = cols(s, image)
 
-        :right ->
-          U.px_to_col_span_from_right(s, image.x, image.width + image.x_offset)
-      end
-
+    # rows + offsets
+    # There is no alignment here, it always
+    # aligns from the top
     {_, to_row, to_row_off} = U.px_to_row_span(s, image.y, image.height + image.y_offset)
-
-    off_x = U.width_from_col_range(s, 0, image.x - 1)
-    off_x = U.width_to_emu(s, off_x)
-    off_x = off_x + U.px_to_emu(s, image.x_offset)
-
-    off_y = U.height_from_row_range(s, 0, image.y - 1)
-    off_y = U.height_to_emu(s, off_y)
-    off_y = off_y + U.px_to_emu(s, image.y_offset)
-
-    ext_cx = U.width_from_col_range(s, 0, to_col - 1)
-    ext_cx = U.width_to_emu(s, ext_cx)
-    ext_cx = ext_cx + U.px_to_emu(s, to_col_off)
-
-    ext_cy = U.height_from_row_range(s, 0, to_row - 1)
-    ext_cy = U.height_to_emu(s, ext_cy)
-    ext_cy = ext_cy + U.px_to_emu(s, to_row_off)
 
     """
     <xdr:twoCellAnchor editAs="oneCell">
-        <xdr:from>
-            <xdr:col>#{from_col}</xdr:col>
-            <xdr:colOff>#{U.px_to_emu(s, from_col_off)}</xdr:colOff>
-            <xdr:row>#{image.y}</xdr:row>
-            <xdr:rowOff>#{U.px_to_emu(s, image.y_offset)}</xdr:rowOff>
-        </xdr:from>
-        <xdr:to>
-            <xdr:col>#{to_col}</xdr:col>
-            <xdr:colOff>#{U.px_to_emu(s, to_col_off)}</xdr:colOff>
-            <xdr:row>#{to_row}</xdr:row>
-            <xdr:rowOff>#{U.px_to_emu(s, to_row_off)}</xdr:rowOff>
-        </xdr:to>
-        <xdr:pic>
-            <xdr:nvPicPr>
-                <xdr:cNvPr id="#{drawing_id}" name="Picture #{drawing_id}"/>
-                <xdr:cNvPicPr>
-                    <a:picLocks noChangeAspect="1"/>
-                </xdr:cNvPicPr>
-            </xdr:nvPicPr>
-            <xdr:blipFill>
-                <a:blip xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"
-                        r:embed="rId#{drawing_id}" cstate="print">
-                </a:blip>
-                <a:stretch>
-                    <a:fillRect/>
-                </a:stretch>
-            </xdr:blipFill>
-            <xdr:spPr>
-                <a:xfrm>
-                    <a:off x="#{off_x}" y="#{off_y}"/>
-                    <a:ext cx="#{ext_cx}" cy="#{ext_cy}"/>
-                </a:xfrm>
-                <a:prstGeom prst="rect">
-                    <a:avLst/>
-                </a:prstGeom>
-            </xdr:spPr>
-        </xdr:pic>
-        <xdr:clientData/>
+      <xdr:from>
+        <xdr:col>#{from_col}</xdr:col>
+        <xdr:colOff>#{U.px_to_emu(from_col_off, s)}</xdr:colOff>
+        <xdr:row>#{image.y}</xdr:row>
+        <xdr:rowOff>#{U.px_to_emu(image.y_offset, s)}</xdr:rowOff>
+      </xdr:from>
+      <xdr:to>
+        <xdr:col>#{to_col}</xdr:col>
+        <xdr:colOff>#{U.px_to_emu(to_col_off, s)}</xdr:colOff>
+        <xdr:row>#{to_row}</xdr:row>
+        <xdr:rowOff>#{U.px_to_emu(to_row_off, s)}</xdr:rowOff>
+      </xdr:to>
+      <xdr:pic>
+        <xdr:nvPicPr>
+          <xdr:cNvPr id="#{drawing_id}" name="Picture #{drawing_id}" />
+          <xdr:cNvPicPr>
+            <a:picLocks noChangeAspect="1"/>
+          </xdr:cNvPicPr>
+        </xdr:nvPicPr>
+        <xdr:blipFill>
+          <a:blip
+            xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"
+            r:embed="rId#{drawing_id}"
+            cstate="print">
+          </a:blip>
+          <a:stretch>
+            <a:fillRect/>
+          </a:stretch>
+        </xdr:blipFill>
+        <xdr:spPr>
+          <a:xfrm>
+            <a:off
+              x="#{xfrm_off_x(s, image)}"
+              y="#{xfrm_off_y(s, image)}"
+            />
+            <a:ext
+              cx="#{xfrm_ext_cx(s, to_col, to_col_off)}"
+              cy="#{xfrm_ext_cy(s, to_row, to_row_off)}"
+            />
+          </a:xfrm>
+          <a:prstGeom prst="rect">
+            <a:avLst/>
+          </a:prstGeom>
+        </xdr:spPr>
+      </xdr:pic>
+      <xdr:clientData />
     </xdr:twoCellAnchor>
     """
   end
@@ -970,5 +961,52 @@ defmodule Elixlsx.XMLTemplates do
     |> String.replace("\" />", "\"/>", global: true)
     |> String.replace("> <", "><", global: true)
     |> String.replace(">  <", "><", global: true)
+  end
+
+  defp cols(sheet, image) do
+    case image.align_x do
+      :left -> U.px_to_col_span_from_left(sheet, image.x, image.width + image.x_offset)
+      :right -> U.px_to_col_span_from_right(sheet, image.x, image.width + image.x_offset)
+    end
+  end
+
+  defp xfrm_off_x(sheet, image) do
+    prev_sum =
+      sheet
+      |> U.width_from_col_range(0, image.x - 1)
+      |> U.width_to_emu(sheet)
+
+    offset = U.px_to_emu(image.x_offset, sheet)
+    prev_sum + offset
+  end
+
+  defp xfrm_off_y(sheet, image) do
+    prev_sum =
+      sheet
+      |> U.height_from_row_range(0, image.y - 1)
+      |> U.height_to_emu(sheet)
+
+    offset = U.px_to_emu(image.y_offset, sheet)
+    prev_sum + offset
+  end
+
+  defp xfrm_ext_cx(sheet, to_col, to_col_off) do
+    prev_sum =
+      sheet
+      |> U.width_from_col_range(0, to_col - 1)
+      |> U.width_to_emu(sheet)
+
+    offset = U.px_to_emu(to_col_off, sheet)
+    prev_sum + offset
+  end
+
+  defp xfrm_ext_cy(sheet, to_row, to_row_off) do
+    prev_sum =
+      sheet
+      |> U.height_from_row_range(0, to_row - 1)
+      |> U.height_to_emu(sheet)
+
+    offset = U.px_to_emu(to_row_off, sheet)
+    prev_sum + offset
   end
 end

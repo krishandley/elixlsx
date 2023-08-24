@@ -308,8 +308,8 @@ defmodule Elixlsx.Util do
   @doc """
   Convert width to emu
   """
-  @spec width_to_emu(Sheet.t(), number) :: number
-  def width_to_emu(sheet, v) do
+  @spec width_to_emu(number, Sheet.t()) :: number
+  def width_to_emu(v, sheet) do
     round(width_to_px(sheet, v) * sheet.emu)
   end
 
@@ -324,8 +324,8 @@ defmodule Elixlsx.Util do
   @doc """
   Convert height to emu
   """
-  @spec height_to_emu(Sheet.t(), number) :: number
-  def height_to_emu(sheet, v) do
+  @spec height_to_emu(number, Sheet.t()) :: number
+  def height_to_emu(v, sheet) do
     round(height_to_px(v) * sheet.emu)
   end
 
@@ -432,8 +432,8 @@ defmodule Elixlsx.Util do
     end
   end
 
-  @spec px_to_emu(Sheet.t(), number) :: number
-  def px_to_emu(sheet, px) do
+  @spec px_to_emu(number, Sheet.t()) :: number
+  def px_to_emu(px, sheet) do
     round(px * sheet.emu)
   end
 end

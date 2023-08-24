@@ -35,10 +35,10 @@ defmodule ExCheck.UtilTest do
 
   test "width_to_emu" do
     sheet = %Sheet{emu: 10}
-    assert Util.width_to_emu(sheet, 1) == 120
+    assert Util.width_to_emu(1, sheet) == 120
 
     sheet = %Sheet{emu: 10, max_char_width: 10}
-    assert Util.width_to_emu(sheet, 1) == 150
+    assert Util.width_to_emu(1, sheet) == 150
   end
 
   test "height_to_px" do
@@ -47,7 +47,7 @@ defmodule ExCheck.UtilTest do
 
   test "height_to_emu" do
     sheet = %Sheet{emu: 10}
-    assert Util.height_to_emu(sheet, 1) == 13
+    assert Util.height_to_emu(1, sheet) == 13
   end
 
   test "px_to_width" do
