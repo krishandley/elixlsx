@@ -352,7 +352,7 @@ defmodule Elixlsx.Util do
   @doc """
   Figure out which columns a pixel width would span.
   """
-  @spec px_to_col_span_from_left(Sheet.t(), number, number) :: {number, number, number}
+  @spec px_to_col_span_from_left(Sheet.t(), number, number) :: {number, number, {number, number}}
   def px_to_col_span_from_left(s, start, px) do
     {end_col, remaining_px} = col_span_acc(s, px, start, 0)
     {start, end_col, remaining_px}

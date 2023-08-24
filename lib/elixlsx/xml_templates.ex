@@ -954,6 +954,7 @@ defmodule Elixlsx.XMLTemplates do
       """
   end
 
+  @spec clean_xml(String.t()) :: String.t()
   defp clean_xml(str) do
     str
     |> String.split("\n")
@@ -963,6 +964,7 @@ defmodule Elixlsx.XMLTemplates do
     |> String.replace(">  <", "><", global: true)
   end
 
+  @spec cols(Sheet.t(), Image.t()) :: {number, number, {number, number}}
   defp cols(sheet, image) do
     case image.align_x do
       :left -> U.px_to_col_span_from_left(sheet, image.x, image.width + image.x_offset)
@@ -970,6 +972,7 @@ defmodule Elixlsx.XMLTemplates do
     end
   end
 
+  @spec xfrm_off_x(Sheet.t(), Image.t()) :: number
   defp xfrm_off_x(sheet, image) do
     prev_sum =
       sheet
@@ -980,6 +983,7 @@ defmodule Elixlsx.XMLTemplates do
     prev_sum + offset
   end
 
+  @spec xfrm_off_y(Sheet.t(), Image.t()) :: number
   defp xfrm_off_y(sheet, image) do
     prev_sum =
       sheet
@@ -990,6 +994,7 @@ defmodule Elixlsx.XMLTemplates do
     prev_sum + offset
   end
 
+  @spec xfrm_ext_cx(Sheet.t(), number, number) :: number
   defp xfrm_ext_cx(sheet, to_col, to_col_off) do
     prev_sum =
       sheet
@@ -1000,6 +1005,7 @@ defmodule Elixlsx.XMLTemplates do
     prev_sum + offset
   end
 
+  @spec xfrm_ext_cy(Sheet.t(), number, number) :: number
   defp xfrm_ext_cy(sheet, to_row, to_row_off) do
     prev_sum =
       sheet
