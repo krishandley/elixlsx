@@ -51,9 +51,9 @@ sheet1 =
   |> Sheet.set_cell("A3", "cow")
   |> Sheet.add_data_validations("A1", "A10", ["dog", "cat", "cow"])
   # within same sheet
-  # |> Sheet.add_data_validations("A1", "A10", "=$A$2:$A$16")
+  |> Sheet.add_data_validations("B1", "B10", "=$B$2:$B$16")
   # reference to other sheet  "=#{sheet.name}!$A$2:$A$16"
-  # |> Sheet.add_data_validations("A1", "A10", "=sheet2!$A$2:$A$16")
+  |> Sheet.add_data_validations("C1", "C10", "=Third!$A$2:$A$16")
 
 workbook = %Workbook{sheets: [sheet1]}
 

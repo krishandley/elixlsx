@@ -347,18 +347,28 @@ defmodule Elixlsx.XMLTemplates do
   end
 
   defp make_data_validation({start_cell, end_cell, values}) do
-    joined_values =
-      values
-      |> Enum.join(",")
-      |> String.codepoints()
-      |> Enum.chunk_every(255)
-      |> Enum.join("&quot;&amp;&quot;")
+    case values do
+      v when is_list(v) ->
+        joined_values =
+          values
+          |> Enum.join(",")
+          |> String.codepoints()
+          |> Enum.chunk_every(255)
+          |> Enum.join("&quot;&amp;&quot;")
 
-    """
-    <dataValidation type="list" allowBlank="1" showErrorMessage="1" sqref="#{start_cell}:#{end_cell}">
-      <formula1>&quot;#{joined_values}&quot;</formula1>
-    </dataValidation>
-    """
+        """
+        <dataValidation type="list" allowBlank="1" showErrorMessage="1" sqref="#{start_cell}:#{end_cell}">
+          <formula1>&quot;#{joined_values}&quot;</formula1>
+        </dataValidation>
+        """
+
+      v when is_binary(v) ->
+        """
+        <dataValidation type="list" allowBlank="1" showErrorMessage="1" sqref="#{start_cell}:#{end_cell}">
+          <formula1>#{v}</formula1>
+        </dataValidation>
+        """
+    end
   end
 
   defp xl_merge_cells([]) do
