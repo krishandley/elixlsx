@@ -82,9 +82,9 @@ defmodule Elixlsx.Writer do
     ]
   end
 
-  @spec get_xl_styles_xml(WorkbookCompInfo.t()) :: zip_tuple
-  def get_xl_styles_xml(wci) do
-    {'xl/styles.xml', XMLTemplates.make_xl_styles(wci)}
+  @spec get_xl_styles_xml(Workbook.t(), WorkbookCompInfo.t()) :: zip_tuple
+  def get_xl_styles_xml(workbook, wci) do
+    {'xl/styles.xml', XMLTemplates.make_xl_styles(workbook, wci)}
   end
 
   @spec get_xl_workbook_xml(Workbook.t(), [SheetCompInfo.t()]) :: zip_tuple
@@ -208,7 +208,7 @@ defmodule Elixlsx.Writer do
     next_free_xl_rid = wci.next_free_xl_rid
 
     [
-      get_xl_styles_xml(wci),
+      get_xl_styles_xml(data, wci),
       get_xl_sharedStrings_xml(data, wci),
       get_xl_workbook_xml(data, sheet_comp_infos)
     ] ++

@@ -874,14 +874,14 @@ defmodule Elixlsx.XMLTemplates do
     Enum.map_join(borders_list, "\n", &BorderStyle.get_border_style_entry(&1))
   end
 
-  @spec make_xl_styles(WorkbookCompInfo.t()) :: String.t()
+  @spec make_xl_styles(Workbook.t(), WorkbookCompInfo.t()) :: String.t()
   @doc ~S"""
   Get the content of the `styles.xml` file.
 
   The WorkbookCompInfo struct must be computed before calling this,
   (especially CellStyleDB.register_all)
   """
-  def make_xl_styles(wci) do
+  def make_xl_styles(workbook, wci) do
     font_list = FontDB.id_sorted_fonts(wci.fontdb)
     fill_list = FillDB.id_sorted_fills(wci.filldb)
     cell_xfs = CellStyleDB.id_sorted_styles(wci.cellstyledb)
@@ -893,7 +893,7 @@ defmodule Elixlsx.XMLTemplates do
     <styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
       #{make_numfmts(numfmts_list)}
       <fonts count="#{1 + length(font_list)}">
-        <font />
+        #{workbook_font(workbook)}
         #{make_font_list(font_list)}
       </fonts>
       <fills count="#{2 + length(fill_list)}">
@@ -1024,5 +1024,20 @@ defmodule Elixlsx.XMLTemplates do
 
     offset = U.px_to_emu(to_row_off, sheet)
     prev_sum + offset
+  end
+
+  defp workbook_font(workbook) do
+    case workbook do
+      %{font: font, font_size: size} when is_binary(font) and is_integer(size) ->
+        """
+        <font>
+          <name val="#{workbook.font}" />
+          <sz val="#{workbook.font_size}" />
+        </font>
+        """
+
+      _ ->
+        "<font />"
+    end
   end
 end

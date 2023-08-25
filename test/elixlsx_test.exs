@@ -206,7 +206,12 @@ defmodule ElixlsxTest do
   end
 
   test "xl/styles.xml" do
-    workbook = %Workbook{sheets: [Sheet.with_name("foo")]}
+    workbook = %Workbook{
+      sheets: [Sheet.with_name("foo")],
+      font: "Calibri Light",
+      font_size: 16
+    }
+
     wci = Elixlsx.Compiler.make_workbook_comp_info(workbook)
     res = Elixlsx.Writer.create_files(workbook, wci)
     doc = get_doc(res, 'xl/styles.xml')
@@ -215,7 +220,10 @@ defmodule ElixlsxTest do
     <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
     <styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
       <fonts count="1">
-        <font />
+        <font>
+          <name val="Calibri Light" />
+          <sz val="16" />
+        </font>
       </fonts>
       <fills count="2">
         <fill>

@@ -55,7 +55,11 @@ sheet1 =
   # reference to other sheet  "=#{sheet.name}!$A$2:$A$16"
   |> Sheet.add_data_validations("C1", "C10", "=Third!$A$2:$A$16")
 
-workbook = %Workbook{sheets: [sheet1]}
+workbook = %Workbook{
+  sheets: [sheet1],
+  font: "Calibri Light",
+  font_size: 16
+}
 
 # it is also possible to add a custom "created" date to workbook, otherwise,
 # the current date is used.
@@ -153,7 +157,7 @@ sheet6 =
 sheet7 = %Sheet{
   name: "Images",
   rows: List.duplicate(["A", "B", "C", "D", "E"], 5),
-  max_char_width: 8
+  max_char_width: 7
 }
 
 sheet7 =
@@ -175,7 +179,7 @@ sheet7 =
 sheet8 = %Sheet{
   name: "Images 2",
   rows: List.duplicate(["A", "B", "C", "D", "E"], 5),
-  max_char_width: 8
+  max_char_width: 7
 }
 
 sheet8 =
