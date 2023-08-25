@@ -127,6 +127,240 @@ defmodule ElixlsxTest do
     end)
   end
 
+  test "docProps/app" do
+    workbook = %Workbook{sheets: [Sheet.with_name("foo")]}
+    wci = Elixlsx.Compiler.make_workbook_comp_info(workbook)
+    res = Elixlsx.Writer.create_files(workbook, wci)
+    doc = get_doc(res, 'docProps/app.xml')
+
+    expected = """
+      <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+      <Properties
+        xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties"
+        xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes">
+        <TotalTime>0</TotalTime>
+        <Application>Elixlsx</Application>
+        <AppVersion>0.52</AppVersion>
+      </Properties>
+    """
+
+    assert doc == Floki.parse_document!(expected)
+  end
+
+  test "docProps/core" do
+    workbook = %Workbook{sheets: [Sheet.with_name("foo")]}
+    wci = Elixlsx.Compiler.make_workbook_comp_info(workbook)
+    res = Elixlsx.Writer.create_files(workbook, wci)
+    doc = get_doc(res, 'docProps/core.xml')
+
+    assert [
+             {:pi, "xml", [{"version", "1.0"}, {"encoding", "UTF-8"}, {"standalone", "yes"}]},
+             {
+               "cp:coreproperties",
+               [
+                 {"xmlns:cp",
+                  "http://schemas.openxmlformats.org/package/2006/metadata/core-properties"},
+                 {"xmlns:dc", "http://purl.org/dc/elements/1.1/"},
+                 {"xmlns:dcterms", "http://purl.org/dc/terms/"},
+                 {"xmlns:dcmitype", "http://purl.org/dc/dcmitype/"},
+                 {"xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance"}
+               ],
+               [
+                 {"dcterms:created", [{"xsi:type", "dcterms:W3CDTF"}], [_]},
+                 {"dc:language", [], ["en-US"]},
+                 {"dcterms:modified", [{"xsi:type", "dcterms:W3CDTF"}], [_]},
+                 {"cp:revision", [], ["1"]}
+               ]
+             }
+           ] = doc
+  end
+
+  test "_rels/.rels" do
+    workbook = %Workbook{sheets: [Sheet.with_name("foo")]}
+    wci = Elixlsx.Compiler.make_workbook_comp_info(workbook)
+    res = Elixlsx.Writer.create_files(workbook, wci)
+    doc = get_doc(res, '_rels/.rels')
+
+    expected = """
+    <?xml version="1.0" encoding="UTF-8"?>
+    <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+      <Relationship
+        Id="rId1"
+        Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument"
+        Target="xl/workbook.xml"
+      />
+      <Relationship
+        Id="rId2"
+        Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties"
+        Target="docProps/core.xml"
+      />
+      <Relationship
+        Id="rId3"
+        Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties"
+        Target="docProps/app.xml"
+      />
+    </Relationships>
+    """
+
+    assert doc == Floki.parse_document!(expected)
+  end
+
+  test "xl/styles.xml" do
+    workbook = %Workbook{sheets: [Sheet.with_name("foo")]}
+    wci = Elixlsx.Compiler.make_workbook_comp_info(workbook)
+    res = Elixlsx.Writer.create_files(workbook, wci)
+    doc = get_doc(res, 'xl/styles.xml')
+
+    expected = """
+    <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+    <styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+      <fonts count="1">
+        <font />
+      </fonts>
+      <fills count="2">
+        <fill>
+          <patternFill patternType="none" />
+        </fill>
+        <fill>
+          <patternFill patternType="gray125" />
+        </fill>
+      </fills>
+      <borders count="1">
+        <border />
+      </borders>
+      <cellStyleXfs count="1">
+        <xf borderId="0" numFmtId="0" fillId="0" fontId="0" applyAlignment="1">
+          <alignment wrapText="1" />
+        </xf>
+      </cellStyleXfs>
+      <cellXfs count="1">
+        <xf borderId="0" numFmtId="0" fillId="0" fontId="0" xfId="0"/>
+      </cellXfs>
+    </styleSheet>
+    """
+
+    assert doc == Floki.parse_document!(expected)
+  end
+
+  test "xl/sharedStrings.xml" do
+    workbook = %Workbook{sheets: [Sheet.with_name("foo")]}
+    wci = Elixlsx.Compiler.make_workbook_comp_info(workbook)
+    res = Elixlsx.Writer.create_files(workbook, wci)
+    doc = get_doc(res, 'xl/sharedStrings.xml')
+
+    expected = """
+    <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+    <sst
+      xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"
+      count="0"
+      uniqueCount="0">
+    </sst>
+    """
+
+    assert doc == Floki.parse_document!(expected)
+  end
+
+  test "xl/workbook.xml" do
+    workbook = %Workbook{sheets: [Sheet.with_name("foo")]}
+    wci = Elixlsx.Compiler.make_workbook_comp_info(workbook)
+    res = Elixlsx.Writer.create_files(workbook, wci)
+    doc = get_doc(res, 'xl/workbook.xml')
+
+    expected = """
+    <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+    <workbook
+      xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"
+      xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+      <fileVersion appName="Calc" />
+      <bookViews>
+        <workbookView activeTab="0" />
+      </bookViews>
+      <sheets>
+        <sheet name="foo" sheetId="1" state="visible" r:id="rId2" />
+      </sheets>
+      <calcPr fullCalcOnLoad="1" iterateCount="100" refMode="A1" iterate="false" iterateDelta="0.001" />
+    </workbook>
+    """
+
+    assert doc == Floki.parse_document!(expected)
+  end
+
+  test "xl/_rels/workbook.xml.rels" do
+    workbook = %Workbook{sheets: [Sheet.with_name("foo")]}
+    wci = Elixlsx.Compiler.make_workbook_comp_info(workbook)
+    res = Elixlsx.Writer.create_files(workbook, wci)
+    doc = get_doc(res, 'xl/_rels/workbook.xml.rels')
+
+    expected = """
+    <?xml version="1.0" encoding="UTF-8"?>
+    <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+      <Relationship
+        Id="rId1"
+        Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles"
+        Target="styles.xml"
+      />
+      <Relationship
+        Id="rId2"
+        Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>   <Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings"
+        Target="sharedStrings.xml"
+      />
+    </Relationships>
+    """
+
+    assert doc == Floki.parse_document!(expected)
+  end
+
+  test "xl/worksheets/sheet1.xml" do
+    workbook = %Workbook{sheets: [Sheet.with_name("foo")]}
+    wci = Elixlsx.Compiler.make_workbook_comp_info(workbook)
+    res = Elixlsx.Writer.create_files(workbook, wci)
+    doc = get_doc(res, 'xl/worksheets/sheet1.xml')
+
+    expected = """
+    <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+    <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+      <sheetPr filterMode="false">
+        <pageSetUpPr fitToPage="false" />
+      </sheetPr>
+      <dimension ref="A1" />
+      <sheetViews>
+        <sheetView workbookViewId="0">
+        <selection  activeCell="A1" sqref="A1" />
+      </sheetView>
+      </sheetViews>
+      <sheetFormatPr defaultRowHeight="12.8" />
+      <sheetData></sheetData>
+      <pageMargins left="0.75" right="0.75" top="1" bottom="1.0" header="0.5" footer="0.5" />
+    </worksheet>
+    """
+
+    assert doc == Floki.parse_document!(expected)
+  end
+
+  test "[Content_Types].xml" do
+    workbook = %Workbook{sheets: [Sheet.with_name("foo")]}
+    wci = Elixlsx.Compiler.make_workbook_comp_info(workbook)
+    res = Elixlsx.Writer.create_files(workbook, wci)
+    doc = get_doc(res, '[Content_Types].xml')
+
+    expected = """
+    <?xml version="1.0" encoding="UTF-8"?>
+    <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+      <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml" />
+      <Override PartName="/_rels/.rels" ContentType="application/vnd.openxmlformats-package.relationships+xml" />
+      <Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml" />
+      <Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml" />
+      <Override PartName="/xl/_rels/workbook.xml.rels" ContentType="application/vnd.openxmlformats-package.relationships+xml" />
+      <Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml" />
+      <Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml" />
+      <Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml" />
+      <Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml" />
+    </Types>
+    """
+
+    assert doc == Floki.parse_document!(expected)
+  end
+
   test "sheet rels" do
     workbook = %Workbook{
       sheets: [
